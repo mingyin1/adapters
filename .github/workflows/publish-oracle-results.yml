@@ -44,7 +44,7 @@ jobs:
       - name: Copy the result tables and result files
         run: |
           set -euo pipefail
-          ls -R artifacts | head -40
+          find artifacts -maxdepth 2 | sort
           for split in eval full; do
             src="artifacts/tavernbench-oracle-$split"
             [ -d "$src" ] || { echo "no artifact for the $split split yet"; continue; }
