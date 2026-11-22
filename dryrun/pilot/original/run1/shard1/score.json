@@ -1,0 +1,156 @@
+{
+ "summary": {
+  "n": 10,
+  "accuracy": 0.0,
+  "score": 0.0,
+  "by_scenario": {
+   "E3": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "B4": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "R1": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "B3": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "B5": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "P1": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "T2": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "O2": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "D1": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "N1": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   }
+  },
+  "by_category": {
+   "economy": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "combat": {
+    "n": 3,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "rules": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "positioning": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "targets": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "ordering": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "selection": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
+   "strategy": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   }
+  },
+  "tokens_in": 0.0,
+  "tokens_out": 0.0,
+  "mean_latency_s": 0.018
+ },
+ "items": [
+  {
+   "id": "E3-000",
+   "correct": 0,
+   "score": 0.0
+  },
+  {
+   "id": "B4-000",
+   "correct": 0,
+   "score": 0.0
+  },
+  {
+   "id": "R1-000",
+   "correct": 0,
+   "score": 0.0
+  },
+  {
+   "id": "B3-000",
+   "correct": 0,
+   "score": 0.0
+  },
+  {
+   "id": "B5-000",
+   "correct": 0,
+   "score": 0.0
+  },
+  {
+   "id": "P1-000",
+   "correct": 0,
+   "score": 0.0
+  },
+  {
+   "id": "T2-000",
+   "correct": 0,
+   "score": 0.0
+  },
+  {
+   "id": "O2-000",
+   "correct": 0,
+   "score": 0.0
+  },
+  {
+   "id": "D1-000",
+   "correct": 0,
+   "score": 0.0
+  },
+  {
+   "id": "N1-000",
+   "correct": 0,
+   "score": 0.0
+  }
+ ]
+}

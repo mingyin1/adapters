@@ -1,0 +1,43 @@
+{
+    "schema_version": 1,
+    "id": "943932f0-e4d3-4b9d-b252-d1e15bdba004",
+    "started_at": "2026-11-22T15:46:40.490006",
+    "updated_at": "2026-11-22T15:48:55.131365",
+    "finished_at": "2026-11-22T15:48:55.131365",
+    "n_total_trials": 10,
+    "stats": {
+        "n_completed_trials": 10,
+        "n_errored_trials": 10,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "claude-code__claude-parity-dry-run__selected": {
+                "n_trials": 0,
+                "n_errors": 10,
+                "metrics": [],
+                "pass_at_k": {},
+                "reward_stats": {},
+                "exception_stats": {
+                    "AgentAuthenticationError": [
+                        "b3-000__RoZu29u",
+                        "b4-000__cvNsYFk",
+                        "b5-000__hkG8EV6",
+                        "d1-000__MrYivqT",
+                        "e3-000__L7VFHmF",
+                        "n1-000__RDH4jZL",
+                        "o2-000__YeAzbqk",
+                        "p1-000__kAtXJYZ",
+                        "r1-000__3G23VPG",
+                        "t2-000__Prk5FmD"
+                    ]
+                }
+            }
+        },
+        "n_input_tokens": 0,
+        "n_cache_tokens": 0,
+        "n_output_tokens": 0,
+        "cost_usd": 0.0
+    }
+}

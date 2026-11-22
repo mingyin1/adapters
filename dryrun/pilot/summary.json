@@ -1,0 +1,361 @@
+{
+ "label": "pilot",
+ "dry_run": true,
+ "settings": {
+  "CLAUDE_CODE_VERSION": "2.1.330",
+  "HARBOR_ENV": "docker",
+  "HARBOR_VERSION": "0.27.0",
+  "MODEL": "claude-parity-dry-run",
+  "MODEL_PROVIDER": "anthropic",
+  "REASONING_EFFORT": "",
+  "TASKS": "pilot"
+ },
+ "settings_consistent": true,
+ "sides": {
+  "original": {
+   "stats": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runs": [
+    {
+     "run": 1,
+     "complete": true,
+     "shards": "1/1",
+     "job_status": [
+      "success"
+     ],
+     "n": 10,
+     "correct": 0.0,
+     "accuracy": 0.0,
+     "errors": {
+      "container could not be run": 10
+     },
+     "cost_usd": null,
+     "workflow_runs": [
+      "https://github.com/mingyin1/adapters/actions/runs/45040092525"
+     ],
+     "shas": {
+      "adapter": [
+       "e5a0aac5d3ad840403264db527b78d9db40b6809"
+      ],
+      "autotavern": [
+       "821fcff66bf2674c8c89606b8331c35698b4ebe8"
+      ],
+      "parity": [
+       "9982a00946b2d2e18a92e0f9524c3e472cd9baa5"
+      ]
+     },
+     "fingerprint": {
+      "TASKS": "pilot",
+      "MODEL_PROVIDER": "anthropic",
+      "MODEL": "claude-parity-dry-run",
+      "CLAUDE_CODE_VERSION": "2.1.330",
+      "REASONING_EFFORT": "",
+      "HARBOR_VERSION": "0.27.0",
+      "HARBOR_ENV": "docker"
+     },
+     "dry_run": true
+    }
+   ]
+  },
+  "harbor": {
+   "stats": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runs": [
+    {
+     "run": 1,
+     "complete": true,
+     "shards": "1/1",
+     "job_status": [
+      "success"
+     ],
+     "n": 10,
+     "correct": 0.0,
+     "accuracy": 0.0,
+     "errors": {
+      "agent ended with an error result": 10,
+      "exception: AgentAuthenticationError": 10,
+      "reward not valid (counted as 0)": 10
+     },
+     "cost_usd": 0.0,
+     "workflow_runs": [
+      "https://github.com/mingyin1/adapters/actions/runs/45040092525"
+     ],
+     "shas": {
+      "adapter": [
+       "e5a0aac5d3ad840403264db527b78d9db40b6809"
+      ],
+      "parity": [
+       "9982a00946b2d2e18a92e0f9524c3e472cd9baa5"
+      ]
+     },
+     "fingerprint": {
+      "TASKS": "pilot",
+      "MODEL_PROVIDER": "anthropic",
+      "MODEL": "claude-parity-dry-run",
+      "CLAUDE_CODE_VERSION": "2.1.330",
+      "REASONING_EFFORT": "",
+      "HARBOR_VERSION": "0.27.0",
+      "HARBOR_ENV": "docker"
+     },
+     "dry_run": true
+    }
+   ]
+  }
+ },
+ "range_overlap": true,
+ "per_task": {
+  "B3-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  },
+  "B4-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  },
+  "B5-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  },
+  "D1-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  },
+  "E3-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  },
+  "N1-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  },
+  "O2-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  },
+  "P1-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  },
+  "R1-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  },
+  "T2-000": {
+   "original": [
+    0.0
+   ],
+   "harbor": [
+    0.0
+   ]
+  }
+ },
+ "disagreements": [],
+ "by_scenario": {
+  "B3": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  },
+  "B4": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  },
+  "B5": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  },
+  "D1": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  },
+  "E3": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  },
+  "N1": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  },
+  "O2": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  },
+  "P1": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  },
+  "R1": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  },
+  "T2": {
+   "original": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "harbor": {
+    "n": 1,
+    "mean": 0.0,
+    "sem": null,
+    "min": 0.0,
+    "max": 0.0
+   }
+  }
+ }
+}

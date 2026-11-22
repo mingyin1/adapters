@@ -1,0 +1,9 @@
+{
+ "TASKS": "pilot",
+ "MODEL_PROVIDER": "anthropic",
+ "MODEL": "claude-parity-dry-run",
+ "CLAUDE_CODE_VERSION": "2.1.330",
+ "REASONING_EFFORT": "",
+ "HARBOR_VERSION": "0.27.0",
+ "HARBOR_ENV": "docker"
+}

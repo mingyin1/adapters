@@ -1,0 +1,32 @@
+Traceback (most recent call last):
+  File "/home/runner/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/trial/single_step.py", line 77, in _run_agent
+    await self._run_agent_phase(
+    ...<5 lines>...
+    )
+  File "/home/runner/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/trial/trial.py", line 784, in _run_agent_phase
+    await asyncio.wait_for(
+    ...<6 lines>...
+    )
+  File "/usr/lib/python3.14/asyncio/tasks.py", line 488, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/home/runner/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/agents/installed/base.py", line 202, in wrapper
+    return await fn(self, instruction, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/agents/installed/claude_code.py", line 2192, in run
+    await self.exec_as_agent(
+    ...<14 lines>...
+    )
+  File "/home/runner/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/agents/installed/base.py", line 1126, in exec_as_agent
+    return await self._exec(
+           ^^^^^^^^^^^^^^^^^
+        environment, command, env=env, cwd=cwd, timeout_sec=timeout_sec
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/runner/.local/share/uv/tools/harbor/lib/python3.14/site-packages/harbor/agents/installed/base.py", line 1093, in _exec
+    raise self._classify_exec_error(command, result)
+harbor.agents.installed.base.AgentAuthenticationError: Command failed (exit 1): export PATH="$HOME/.local/bin:$PATH"; claude_code_instruction_596bfe9368184006807da45bc63e3520="$CLAUDE_CODE_INSTRUCTION_596BFE9368184006807DA45BC63E3520"; unset CLAUDE_CODE_INSTRUCTION_596BFE9368184006807DA45BC63E3520; printf "%s" "$claude_code_instruction_596bfe9368184006807da45bc63e3520" | claude --verbose --output-format=stream-json --disallowedTools WebSearch,WebFetch --permission-mode=bypassPermissions --print 2>&1 | tee /logs/agent/claude-code.txt
+stdout: [claude-code:unrecognized_model] {"model":"claude-parity-dry-run","query_source":"sdk"}
+{"duration_api_ms":0,"stop_reason":"stop_sequence","session_id":"5417f854-05ce-475b-b193-df6be49d168a","total_cost_usd":0,"usage":{"output_tokens_details":{"think ... [412 chars truncated] ... ason":"api_error","fast_mode_state":"off","fast_mode_disabled_reason":"sdk_opt_in_required","subagent_stats":{"spawned":0,"requested":{"background":0,"foreground":0,"unset":0},"started_in_background":0,"max_depth":0,"spawned_by_subagents":0,"completed":0,"failed":0,"killed":{"parent":0,"user":0,"system":0},"refused":{"depth_limit":0,"concurrency_limit":0,"budget":0},"by_type":{}},"safety_stops":0,"is_error":true,"num_turns":1,"subtype":"success","api_error_status":401,"api_error_type":"authentication_error","api_error_origin":"first_party","result":"Invalid API key · Fix external API key","type":"result","duration_ms":268,"uuid":"663fbfac-f930-4364-b098-05b25775432f","queued_turn_count":0,"result_index":0,"model_usage_since_last_result":{}}
+stderr: None

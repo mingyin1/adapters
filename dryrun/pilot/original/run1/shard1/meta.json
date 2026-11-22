@@ -1,0 +1,109 @@
+{
+ "side": "original",
+ "run": 1,
+ "shard": 1,
+ "shards": 1,
+ "label": "pilot",
+ "dry_run": true,
+ "fingerprint": {
+  "TASKS": "pilot",
+  "MODEL_PROVIDER": "anthropic",
+  "MODEL": "claude-parity-dry-run",
+  "CLAUDE_CODE_VERSION": "2.1.330",
+  "REASONING_EFFORT": "",
+  "HARBOR_VERSION": "0.27.0",
+  "HARBOR_ENV": "docker"
+ },
+ "config": {
+  "ENABLED": "true",
+  "DRY_RUN": "true",
+  "LABEL": "pilot",
+  "TASKS": "pilot",
+  "RUNS": "1",
+  "SIDES": "both",
+  "SHARDS": "1",
+  "MODEL": "claude-parity-dry-run",
+  "MODEL_PROVIDER": "anthropic",
+  "CLAUDE_CODE_VERSION": "2.1.330",
+  "REASONING_EFFORT": "",
+  "AUTH_VAR": "ANTHROPIC_API_KEY",
+  "N_CONCURRENT": "4",
+  "HARBOR_VERSION": "0.27.0",
+  "HARBOR_ENV": "docker",
+  "ADAPTER_REF": "tavernbench-adapter",
+  "AUTOTAVERN_REPO": "mingyin1/AutoTavern",
+  "AUTOTAVERN_REF": "harbor-parity"
+ },
+ "shas": {
+  "adapter": "e5a0aac5d3ad840403264db527b78d9db40b6809",
+  "parity": "9982a00946b2d2e18a92e0f9524c3e472cd9baa5",
+  "autotavern": "821fcff66bf2674c8c89606b8331c35698b4ebe8"
+ },
+ "job_status": "success",
+ "workflow_run": "https://github.com/mingyin1/adapters/actions/runs/45040092525",
+ "written_at": "2026-11-22T15:47:26+00:00",
+ "ids": [
+  "B3-000",
+  "B4-000",
+  "B5-000",
+  "D1-000",
+  "E3-000",
+  "N1-000",
+  "O2-000",
+  "P1-000",
+  "R1-000",
+  "T2-000"
+ ],
+ "tasks": {
+  "B3-000": {
+   "scenario": "B3",
+   "category": "combat",
+   "scoring": "brier"
+  },
+  "B4-000": {
+   "scenario": "B4",
+   "category": "combat",
+   "scoring": "numeric_rel"
+  },
+  "B5-000": {
+   "scenario": "B5",
+   "category": "combat",
+   "scoring": "numeric_abs"
+  },
+  "D1-000": {
+   "scenario": "D1",
+   "category": "selection",
+   "scoring": "exact"
+  },
+  "E3-000": {
+   "scenario": "E3",
+   "category": "economy",
+   "scoring": "value_map"
+  },
+  "N1-000": {
+   "scenario": "N1",
+   "category": "strategy",
+   "scoring": "exact"
+  },
+  "O2-000": {
+   "scenario": "O2",
+   "category": "ordering",
+   "scoring": "value_map_str"
+  },
+  "P1-000": {
+   "scenario": "P1",
+   "category": "positioning",
+   "scoring": "exact"
+  },
+  "R1-000": {
+   "scenario": "R1",
+   "category": "rules",
+   "scoring": "set"
+  },
+  "T2-000": {
+   "scenario": "T2",
+   "category": "targets",
+   "scoring": "value_json"
+  }
+ }
+}
