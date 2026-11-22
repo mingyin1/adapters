@@ -1,0 +1,147 @@
+# Runs the TavernBench adapter's oracle with Harbor and Docker on a GitHub-hosted runner.
+#
+# This workflow lives only on the fork's `oracle-ci` branch and is not part of the
+# adapter pull request. It checks out the adapter branch, generates the tasks,
+# runs `harbor run -a oracle`, and uploads the job directory and an image of
+# Harbor's result table. A push to `oracle-ci` starts a run.
+name: TavernBench oracle
+
+on:
+  push:
+    branches: [oracle-ci]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or commit of the adapter to test
+        default: tavernbench-adapter
+
+permissions:
+  contents: read
+
+env:
+  HARBOR_VERSION: "0.27.0"
+  ADAPTER_REF: ${{ inputs.ref || 'tavernbench-adapter' }}
+
+jobs:
+  oracle:
+    name: oracle (${{ matrix.split }} split)
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - split: eval
+            tasks: 368
+          - split: full
+            tasks: 960
+    env:
+      SPLIT: ${{ matrix.split }}
+      EXPECTED_TASKS: ${{ matrix.tasks }}
+      JOB_NAME: tavernbench-oracle-${{ matrix.split }}
+    steps:
+      - name: Check out the adapter
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.ADAPTER_REF }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install Harbor
+        run: |
+          uv tool install "harbor==${HARBOR_VERSION}"
+          harbor --version
+          docker version --format 'Docker {{.Server.Version}}'
+
+      - name: Generate tasks
+        working-directory: src/tavernbench
+        run: |
+          uv run tavernbench --split "$SPLIT" --output-dir "$GITHUB_WORKSPACE/datasets/tavernbench-$SPLIT"
+          test "$(ls "$GITHUB_WORKSPACE/datasets/tavernbench-$SPLIT" | wc -l)" -eq "$EXPECTED_TASKS"
+
+      - name: Run the oracle
+        run: |
+          harbor run -p "datasets/tavernbench-$SPLIT" -a oracle -n 8 \
+            --job-name "$JOB_NAME" -o jobs --quiet --yes
+
+      - name: Check the result and render Harbor's result table
+        if: always()
+        run: |
+          export ADAPTER_SHA="$(git rev-parse HEAD)"
+          "$(uv tool dir)/harbor/bin/python" - <<'PY'
+          import importlib.metadata
+          import os
+          import sys
+          from pathlib import Path
+
+          from rich.console import Console
+
+          import harbor.cli.jobs as harbor_jobs
+          from harbor.models.job.result import JobResult
+
+          split = os.environ["SPLIT"]
+          expected = int(os.environ["EXPECTED_TASKS"])
+          job_dir = Path("jobs") / os.environ["JOB_NAME"]
+          result_path = job_dir / "result.json"
+          summary = open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8")
+          if not result_path.is_file():
+              summary.write(f"### TavernBench oracle ({split} split)\n\nNo `result.json` was written.\n")
+              sys.exit(1)
+
+          result = JobResult.model_validate_json(result_path.read_text(encoding="utf-8"))
+          version = importlib.metadata.version("harbor")
+          sha = os.environ["ADAPTER_SHA"]
+
+          console = Console(record=True, width=92, force_terminal=True, color_system="truecolor")
+          harbor_jobs.console = console  # print_job_results_tables prints to this console
+          console.print(f"[bold]$ harbor run -p datasets/tavernbench-{split} -a oracle[/bold]")
+          console.print(f"Harbor {version} · TavernBench adapter @ {sha[:7]} · {split} split, {expected} tasks")
+          console.print()
+          harbor_jobs.print_job_results_tables(result)
+          console.save_svg(f"oracle-{split}.svg", title=f"TavernBench oracle ({split} split)")
+
+          (stats,) = result.stats.evals.values()
+          means = [m["mean"] for m in stats.metrics if "mean" in m]
+          rewards = {
+              str(value): len(trials)
+              for per_key in stats.reward_stats.values()
+              for value, trials in per_key.items()
+          }
+          ok = stats.n_trials == expected and stats.n_errors == 0 and means == [1.0]
+
+          summary.write(f"### TavernBench oracle ({split} split): {'passed' if ok else 'FAILED'}\n\n")
+          summary.write("| Harbor | Adapter commit | Tasks | Trials | Exceptions | Mean reward | Rewards |\n")
+          summary.write("|---|---|---|---|---|---|---|\n")
+          summary.write(
+              f"| {version} | `{sha[:7]}` | {expected} | {stats.n_trials} | {stats.n_errors} | "
+              f"{', '.join(f'{m:.3f}' for m in means)} | "
+              f"{', '.join(f'{k}: {v}' for k, v in sorted(rewards.items()))} |\n\n"
+          )
+          if stats.exception_stats:
+              summary.write("Exceptions: " + ", ".join(f"{k} ({len(v)})" for k, v in stats.exception_stats.items()) + "\n\n")
+          summary.close()
+          sys.exit(0 if ok else 1)
+          PY
+
+      - name: Convert the table image to PNG
+        if: always()
+        continue-on-error: true
+        run: |
+          test -f "oracle-$SPLIT.svg"
+          read -r W H < <(python3 -c "import re,sys; s=open(sys.argv[1]).read(); m=re.search(r'viewBox=\"0 0 ([0-9.]+) ([0-9.]+)\"', s); print(int(float(m.group(1)))+1, int(float(m.group(2)))+1)" "oracle-$SPLIT.svg")
+          google-chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars \
+            --force-device-scale-factor=2 --window-size="$W,$H" \
+            --screenshot="$GITHUB_WORKSPACE/oracle-$SPLIT.png" "file://$GITHUB_WORKSPACE/oracle-$SPLIT.svg"
+          ls -la "oracle-$SPLIT.png"
+
+      - name: Upload the job directory and the result table
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tavernbench-oracle-${{ matrix.split }}
+          path: |
+            jobs/${{ env.JOB_NAME }}
+            oracle-${{ matrix.split }}.svg
+            oracle-${{ matrix.split }}.png
+          if-no-files-found: warn
