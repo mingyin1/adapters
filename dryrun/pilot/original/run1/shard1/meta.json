@@ -36,12 +36,12 @@
  },
  "shas": {
   "adapter": "e5a0aac5d3ad840403264db527b78d9db40b6809",
-  "parity": "9982a00946b2d2e18a92e0f9524c3e472cd9baa5",
+  "parity": "d746ba5953ece4f744adc03978e72c17ac1f33c7",
   "autotavern": "821fcff66bf2674c8c89606b8331c35698b4ebe8"
  },
  "job_status": "success",
- "workflow_run": "https://github.com/mingyin1/adapters/actions/runs/45040092525",
- "written_at": "2026-11-22T15:47:26+00:00",
+ "workflow_run": "https://github.com/mingyin1/adapters/actions/runs/45040565030",
+ "written_at": "2026-11-22T15:53:16+00:00",
  "ids": [
   "B3-000",
   "B4-000",

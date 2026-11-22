@@ -7,15 +7,17 @@ Model `anthropic/claude-parity-dry-run` · Claude Code `2.1.330` · reasoning ef
 
 | Side | Complete runs | Accuracy per run (%) | Mean ± SEM (%) | Cost (USD) |
 |---|---|---|---|---|
-| Original (AutoTavern `run_agent.py` + upstream scorer) | 1 | run 1: 0.0 | 0.0 | – |
+| Original (AutoTavern `run_agent.py` + upstream scorer) | 1 | run 1: 0.0 | 0.0 | 0.00 |
 | Harbor (adapter + `claude-code` agent) | 1 | run 1: 0.0 | 0.0 | 0.00 |
+
+**Warning:** some tasks were never graded and count as 0 (original run 1: 10, harbor run 1: 10). These are setup, configuration or infrastructure errors, not agent results; see Errors.
 
 Run-score ranges overlap: **yes** (the match criterion, meant for three runs per side).
 
 ## Errors
 
-- original, run 1 (10 tasks, shards 1/1, job success): container could not be run: 10
-- harbor, run 1 (10 tasks, shards 1/1, job success): agent ended with an error result: 10, exception: AgentAuthenticationError: 10, reward not valid (counted as 0): 10
+- original, run 1 (10 tasks, shards 1/1, job success): agent ended with an error result: 10, exception: AgentAuthenticationError: 10, no answer file: 10, not graded (setup, configuration or infrastructure error): 10, reward not valid (counted as 0): 10
+- harbor, run 1 (10 tasks, shards 1/1, job success): agent ended with an error result: 10, exception: AgentAuthenticationError: 10, not graded (setup, configuration or infrastructure error): 10, reward not valid (counted as 0): 10
 
 ## Per task
 
@@ -49,5 +51,5 @@ Run-score ranges overlap: **yes** (the match criterion, meant for three runs per
 | R1 | 1 | 0.0 | 1 | 0.0 |
 | T2 | 1 | 0.0 | 1 | 0.0 |
 
-Workflow runs: [45040092525](https://github.com/mingyin1/adapters/actions/runs/45040092525)
+Workflow runs: [45040565030](https://github.com/mingyin1/adapters/actions/runs/45040565030)
 

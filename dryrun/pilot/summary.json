@@ -32,11 +32,15 @@
      "correct": 0.0,
      "accuracy": 0.0,
      "errors": {
-      "container could not be run": 10
+      "agent ended with an error result": 10,
+      "exception: AgentAuthenticationError": 10,
+      "no answer file": 10,
+      "not graded (setup, configuration or infrastructure error)": 10,
+      "reward not valid (counted as 0)": 10
      },
-     "cost_usd": null,
+     "cost_usd": 0.0,
      "workflow_runs": [
-      "https://github.com/mingyin1/adapters/actions/runs/45040092525"
+      "https://github.com/mingyin1/adapters/actions/runs/45040565030"
      ],
      "shas": {
       "adapter": [
@@ -46,7 +50,7 @@
        "821fcff66bf2674c8c89606b8331c35698b4ebe8"
       ],
       "parity": [
-       "9982a00946b2d2e18a92e0f9524c3e472cd9baa5"
+       "d746ba5953ece4f744adc03978e72c17ac1f33c7"
       ]
      },
      "fingerprint": {
@@ -84,18 +88,19 @@
      "errors": {
       "agent ended with an error result": 10,
       "exception: AgentAuthenticationError": 10,
+      "not graded (setup, configuration or infrastructure error)": 10,
       "reward not valid (counted as 0)": 10
      },
      "cost_usd": 0.0,
      "workflow_runs": [
-      "https://github.com/mingyin1/adapters/actions/runs/45040092525"
+      "https://github.com/mingyin1/adapters/actions/runs/45040565030"
      ],
      "shas": {
       "adapter": [
        "e5a0aac5d3ad840403264db527b78d9db40b6809"
       ],
       "parity": [
-       "9982a00946b2d2e18a92e0f9524c3e472cd9baa5"
+       "d746ba5953ece4f744adc03978e72c17ac1f33c7"
       ]
      },
      "fingerprint": {

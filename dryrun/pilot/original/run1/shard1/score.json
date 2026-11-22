@@ -4,6 +4,11 @@
   "accuracy": 0.0,
   "score": 0.0,
   "by_scenario": {
+   "B3": {
+    "n": 1,
+    "acc": 0.0,
+    "score": 0.0
+   },
    "E3": {
     "n": 1,
     "acc": 0.0,
@@ -19,11 +24,6 @@
     "acc": 0.0,
     "score": 0.0
    },
-   "B3": {
-    "n": 1,
-    "acc": 0.0,
-    "score": 0.0
-   },
    "B5": {
     "n": 1,
     "acc": 0.0,
@@ -34,12 +34,12 @@
     "acc": 0.0,
     "score": 0.0
    },
-   "T2": {
+   "O2": {
     "n": 1,
     "acc": 0.0,
     "score": 0.0
    },
-   "O2": {
+   "T2": {
     "n": 1,
     "acc": 0.0,
     "score": 0.0
@@ -56,13 +56,13 @@
    }
   },
   "by_category": {
-   "economy": {
-    "n": 1,
+   "combat": {
+    "n": 3,
     "acc": 0.0,
     "score": 0.0
    },
-   "combat": {
-    "n": 3,
+   "economy": {
+    "n": 1,
     "acc": 0.0,
     "score": 0.0
    },
@@ -76,12 +76,12 @@
     "acc": 0.0,
     "score": 0.0
    },
-   "targets": {
+   "ordering": {
     "n": 1,
     "acc": 0.0,
     "score": 0.0
    },
-   "ordering": {
+   "targets": {
     "n": 1,
     "acc": 0.0,
     "score": 0.0
@@ -99,9 +99,14 @@
   },
   "tokens_in": 0.0,
   "tokens_out": 0.0,
-  "mean_latency_s": 0.018
+  "mean_latency_s": 3.4259999999999997
  },
  "items": [
+  {
+   "id": "B3-000",
+   "correct": 0,
+   "score": 0.0
+  },
   {
    "id": "E3-000",
    "correct": 0,
@@ -118,11 +123,6 @@
    "score": 0.0
   },
   {
-   "id": "B3-000",
-   "correct": 0,
-   "score": 0.0
-  },
-  {
    "id": "B5-000",
    "correct": 0,
    "score": 0.0
@@ -133,12 +133,12 @@
    "score": 0.0
   },
   {
-   "id": "T2-000",
+   "id": "O2-000",
    "correct": 0,
    "score": 0.0
   },
   {
-   "id": "O2-000",
+   "id": "T2-000",
    "correct": 0,
    "score": 0.0
   },

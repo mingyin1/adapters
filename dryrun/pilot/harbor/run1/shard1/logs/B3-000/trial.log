@@ -5,8 +5,8 @@ Running command: set -euo pipefail; curl -fsSL https://downloads.claude.ai/claud
 Command outputs captured
 Running command: mkdir -p $CLAUDE_CONFIG_DIR/debug $CLAUDE_CONFIG_DIR/projects/-app $CLAUDE_CONFIG_DIR/shell-snapshots $CLAUDE_CONFIG_DIR/statsig $CLAUDE_CONFIG_DIR/todos $CLAUDE_CONFIG_DIR/skills && if [ -d ~/.claude/skills ]; then cp -r ~/.claude/skills/. $CLAUDE_CONFIG_DIR/skills/ 2>/dev/null || true; fi
 Command outputs captured
-Running command: export PATH="$HOME/.local/bin:$PATH"; claude_code_instruction_fa43edfc9e76453e9a1b92aa52eb66b7="$CLAUDE_CODE_INSTRUCTION_FA43EDFC9E76453E9A1B92AA52EB66B7"; unset CLAUDE_CODE_INSTRUCTION_FA43EDFC9E76453E9A1B92AA52EB66B7; printf "%s" "$claude_code_instruction_fa43edfc9e76453e9a1b92aa52eb66b7" | claude --verbose --output-format=stream-json --disallowedTools WebSearch,WebFetch --permission-mode=bypassPermissions --print 2>&1 | tee /logs/agent/claude-code.txt
+Running command: export PATH="$HOME/.local/bin:$PATH"; claude_code_instruction_db2e28066994475798aae741f7738ce5="$CLAUDE_CODE_INSTRUCTION_DB2E28066994475798AAE741F7738CE5"; unset CLAUDE_CODE_INSTRUCTION_DB2E28066994475798AAE741F7738CE5; printf "%s" "$claude_code_instruction_db2e28066994475798aae741f7738ce5" | claude --verbose --output-format=stream-json --disallowedTools WebSearch,WebFetch --permission-mode=bypassPermissions --print 2>&1 | tee /logs/agent/claude-code.txt
 Command failed
 Classified failed command as AgentAuthenticationError (pattern: '\\binvalid_api_key\\b|Invalid API key\\b|API key is invalid\\b|Incorrect API key provided\\b|unexpected status 401 Unauthorized\\b')
-Wrote Claude Code trajectory to jobs/harbor-run1-shard1/b3-000__RoZu29u/agent/trajectory.json
+Wrote Claude Code trajectory to jobs/harbor-run1-shard1/b3-000__4ePo5wp/agent/trajectory.json
 Collecting main service artifacts
