@@ -1,0 +1,362 @@
+# Runs the TavernBench parity experiment on GitHub-hosted runners: the same Claude Code
+# agent, model and settings on the original harness (AutoTavern's run_agent.py and the
+# upstream scorer) and on Harbor (the adapter and Harbor's claude-code agent).
+#
+# This workflow lives only on the fork's `parity-ci` branch and is not part of the
+# adapter pull request. Pushing a change to parity/config.env starts it; see
+# parity/README.md. Results and a summary are committed to the `parity-results` branch.
+# The API key is read from the TB_API_KEY repository secret (TB_BASE_URL for a custom
+# endpoint) and removed from every file before anything is uploaded or committed.
+name: TavernBench parity
+
+on:
+  push:
+    branches: [parity-ci]
+    paths: [parity/config.env]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tavernbench-parity
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: plan and pre-flight checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      enabled: ${{ steps.plan.outputs.enabled }}
+      dry_run: ${{ steps.plan.outputs.dry_run }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+      harbor: ${{ steps.plan.outputs.harbor }}
+      original: ${{ steps.plan.outputs.original }}
+      label: ${{ steps.plan.outputs.label }}
+      results_dir: ${{ steps.plan.outputs.results_dir }}
+      agent_flags: ${{ steps.check.outputs.agent_flags }}
+      agent_model: ${{ steps.check.outputs.agent_model }}
+      harbor_agent_args: ${{ steps.check.outputs.harbor_agent_args }}
+    steps:
+      - name: Check out the parity configuration
+        uses: actions/checkout@v4
+
+      - name: Read the configuration
+        run: python3 parity/plan.py env >> "$GITHUB_ENV"
+
+      - name: Plan the run
+        id: plan
+        env:
+          HAS_KEY: ${{ secrets.TB_API_KEY != '' }}
+          HAS_DAYTONA: ${{ secrets.DAYTONA_API_KEY != '' }}
+        run: |
+          git fetch --no-tags --depth=1 origin \
+            '+refs/heads/parity-results:refs/remotes/origin/parity-results' || true
+          python3 parity/plan.py outputs --results-ref refs/remotes/origin/parity-results >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+      - name: Report a disabled run
+        if: steps.plan.outputs.enabled != 'true'
+        run: |
+          echo "### TavernBench parity: not run" >> "$GITHUB_STEP_SUMMARY"
+          echo "ENABLED=false in parity/config.env, so nothing was run." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Set up uv
+        if: steps.plan.outputs.enabled == 'true'
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install Harbor
+        if: steps.plan.outputs.enabled == 'true'
+        run: |
+          uv tool install "harbor==${HARBOR_VERSION}"
+          harbor --version
+
+      - name: Check out the adapter
+        if: steps.plan.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.ADAPTER_REF }}
+          path: adapter
+
+      - name: Check out AutoTavern
+        if: steps.plan.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.AUTOTAVERN_REPO }}
+          ref: ${{ env.AUTOTAVERN_REF }}
+          path: autotavern
+
+      - name: Generate the tasks
+        if: steps.plan.outputs.enabled == 'true'
+        working-directory: adapter/src/tavernbench
+        run: uv run tavernbench --split eval --output-dir "$GITHUB_WORKSPACE/datasets/tavernbench"
+
+      - name: Check that both sides run the agent the same way
+        id: check
+        if: steps.plan.outputs.enabled == 'true'
+        run: |
+          "$(uv tool dir)/harbor/bin/python" parity/check_harbor_agent.py \
+            --run-agent autotavern/tavernbench/tavernbench/run_agent.py \
+            --tasks datasets/tavernbench >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+
+  harbor:
+    name: harbor (run ${{ matrix.run }}, shard ${{ matrix.shard }})
+    needs: plan
+    if: needs.plan.outputs.enabled == 'true' && needs.plan.outputs.harbor == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      RUN: ${{ matrix.run }}
+      SHARD: ${{ matrix.shard }}
+      OUT: out/harbor/run${{ matrix.run }}/shard${{ matrix.shard }}
+      JOB_NAME: harbor-run${{ matrix.run }}-shard${{ matrix.shard }}
+    steps:
+      - name: Check out the parity configuration
+        uses: actions/checkout@v4
+
+      - name: Read the configuration
+        run: python3 parity/plan.py env >> "$GITHUB_ENV"
+
+      - name: Check out the adapter
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.ADAPTER_REF }}
+          path: adapter
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install Harbor
+        run: |
+          uv tool install "harbor==${HARBOR_VERSION}"
+          harbor --version
+
+      - name: Generate and select the tasks
+        run: |
+          (cd adapter/src/tavernbench && uv run tavernbench --split eval --output-dir "$GITHUB_WORKSPACE/datasets/tavernbench")
+          python3 parity/plan.py select --tasks datasets/tavernbench --shard "$SHARD" \
+            --copy-to datasets/selected --ids-out selected_ids.txt
+
+      - name: Run Harbor
+        id: run
+        timeout-minutes: 330
+        env:
+          TB_API_KEY: ${{ needs.plan.outputs.dry_run != 'true' && secrets.TB_API_KEY || '' }}
+          TB_BASE_URL: ${{ needs.plan.outputs.dry_run != 'true' && secrets.TB_BASE_URL || '' }}
+          TB_DAYTONA_API_KEY: ${{ secrets.DAYTONA_API_KEY }}
+          HARBOR_AGENT_ARGS: ${{ needs.plan.outputs.harbor_agent_args }}
+        run: |
+          source parity/agent_env.sh
+          env_args=()
+          if [ "$HARBOR_ENV" = daytona ]; then
+            export DAYTONA_API_KEY="$TB_DAYTONA_API_KEY"
+            env_args=(-e daytona)
+          fi
+          unset TB_DAYTONA_API_KEY
+          # HARBOR_AGENT_ARGS is "--ak key=value ..." built from checked settings, without spaces in values.
+          # shellcheck disable=SC2086
+          harbor run -p datasets/selected -a claude-code -m "$MODEL_PROVIDER/$MODEL" \
+            $HARBOR_AGENT_ARGS "${env_args[@]}" -n "$N_CONCURRENT" \
+            --job-name "$JOB_NAME" -o jobs --quiet --yes
+
+      - name: Collect the results
+        if: always() && steps.run.outcome != 'skipped'
+        env:
+          RUN_OUTCOME: ${{ steps.run.outcome }}
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" jobs 2>/dev/null || true
+          "$(uv tool dir)/harbor/bin/python" parity/collect_harbor.py \
+            --job "jobs/$JOB_NAME" --out "$OUT" --keep-logs
+          python3 parity/plan.py meta --side harbor --run "$RUN" --shard "$SHARD" \
+            --ids selected_ids.txt --tasks datasets/tavernbench --out "$OUT" \
+            --sha "adapter=$(git -C adapter rev-parse HEAD)" --sha "parity=$(git rev-parse HEAD)" \
+            --status "$RUN_OUTCOME"
+
+      - name: Remove secret values from the results
+        id: redact
+        if: always() && steps.run.outcome != 'skipped'
+        env:
+          SECRET_VALUES: ${{ secrets.TB_API_KEY }} ${{ secrets.DAYTONA_API_KEY }} ${{ secrets.TB_BASE_URL }}
+        run: python3 parity/redact.py out jobs
+
+      - name: Upload the results
+        if: always() && steps.redact.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-harbor-run${{ matrix.run }}-shard${{ matrix.shard }}
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+
+      - name: Upload Harbor's job directory
+        if: always() && steps.redact.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: jobdir-harbor-run${{ matrix.run }}-shard${{ matrix.shard }}
+          path: jobs/${{ env.JOB_NAME }}
+          if-no-files-found: warn
+
+  original:
+    name: original (run ${{ matrix.run }}, shard ${{ matrix.shard }})
+    needs: plan
+    if: needs.plan.outputs.enabled == 'true' && needs.plan.outputs.original == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      RUN: ${{ matrix.run }}
+      SHARD: ${{ matrix.shard }}
+      OUT: out/original/run${{ matrix.run }}/shard${{ matrix.shard }}
+    steps:
+      - name: Check out the parity configuration
+        uses: actions/checkout@v4
+
+      - name: Read the configuration
+        run: python3 parity/plan.py env >> "$GITHUB_ENV"
+
+      - name: Check out the adapter
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.ADAPTER_REF }}
+          path: adapter
+
+      - name: Check out AutoTavern
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.AUTOTAVERN_REPO }}
+          ref: ${{ env.AUTOTAVERN_REF }}
+          path: autotavern
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install Harbor (for its error classification)
+        run: uv tool install "harbor==${HARBOR_VERSION}"
+
+      - name: Generate and select the tasks
+        run: |
+          (cd adapter/src/tavernbench && uv run tavernbench --split eval --output-dir "$GITHUB_WORKSPACE/datasets/tavernbench")
+          python3 parity/plan.py select --tasks datasets/tavernbench --shard "$SHARD" \
+            --copy-to datasets/selected --ids-out selected_ids.txt
+
+      - name: Build the agent image
+        run: |
+          docker build -f autotavern/tavernbench/harbor_parity/Dockerfile.agent \
+            --build-arg "CLAUDE_CODE_VERSION=$CLAUDE_CODE_VERSION" \
+            -t "tavernbench-agent:$CLAUDE_CODE_VERSION" autotavern/tavernbench/harbor_parity
+
+      - name: Run the agent on the original harness
+        id: run
+        timeout-minutes: 330
+        working-directory: autotavern/tavernbench
+        env:
+          TB_API_KEY: ${{ needs.plan.outputs.dry_run != 'true' && secrets.TB_API_KEY || '' }}
+          TB_BASE_URL: ${{ needs.plan.outputs.dry_run != 'true' && secrets.TB_BASE_URL || '' }}
+          AGENT_FLAGS: ${{ needs.plan.outputs.agent_flags }}
+          AGENT_MODEL: ${{ needs.plan.outputs.agent_model }}
+        run: |
+          source "$GITHUB_WORKSPACE/parity/agent_env.sh"
+          mkdir -p "$GITHUB_WORKSPACE/$OUT"
+          python -m tavernbench.run_agent --set data/eval \
+            --harbor-tasks "$GITHUB_WORKSPACE/datasets/tavernbench" \
+            --image "tavernbench-agent:$CLAUDE_CODE_VERSION" --model "$AGENT_MODEL" \
+            --cli-flags="$AGENT_FLAGS" --out "$GITHUB_WORKSPACE/$OUT/answers.jsonl" \
+            --jobs "$N_CONCURRENT" --keep-logs \
+            --ids "$(paste -sd, "$GITHUB_WORKSPACE/selected_ids.txt")"
+
+      - name: Apply Harbor's error policy and score
+        if: always() && steps.run.outcome != 'skipped'
+        env:
+          RUN_OUTCOME: ${{ steps.run.outcome }}
+        run: |
+          touch "$OUT/answers.jsonl"
+          "$(uv tool dir)/harbor/bin/python" parity/error_policy.py \
+            --run-agent autotavern/tavernbench/tavernbench/run_agent.py \
+            --answers "$OUT/answers.jsonl" --out "$OUT/graded_answers.jsonl"
+          (cd autotavern/tavernbench && python -X utf8 -m tavernbench.score --set data/eval \
+            --answers "$GITHUB_WORKSPACE/$OUT/graded_answers.jsonl" --json) > "$OUT/score.json"
+          python3 -c "import json,sys; s=json.load(open(sys.argv[1]))['summary']; print('scored', s['n'], 'accuracy', s['accuracy'])" "$OUT/score.json"
+          python3 parity/plan.py meta --side original --run "$RUN" --shard "$SHARD" \
+            --ids selected_ids.txt --tasks datasets/tavernbench --out "$OUT" \
+            --sha "adapter=$(git -C adapter rev-parse HEAD)" --sha "parity=$(git rev-parse HEAD)" \
+            --sha "autotavern=$(git -C autotavern rev-parse HEAD)" --status "$RUN_OUTCOME"
+
+      - name: Remove secret values from the results
+        id: redact
+        if: always() && steps.run.outcome != 'skipped'
+        env:
+          SECRET_VALUES: ${{ secrets.TB_API_KEY }} ${{ secrets.TB_BASE_URL }}
+        run: python3 parity/redact.py out
+
+      - name: Upload the results
+        if: always() && steps.redact.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-original-run${{ matrix.run }}-shard${{ matrix.shard }}
+          path: ${{ env.OUT }}
+          if-no-files-found: error
+
+  publish:
+    name: publish the results
+    needs: [plan, harbor, original]
+    if: always() && needs.plan.result == 'success' && needs.plan.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      RESULTS_DIR: ${{ needs.plan.outputs.results_dir }}
+    steps:
+      - name: Check out the parity scripts
+        uses: actions/checkout@v4
+        with:
+          path: ci
+
+      - name: Check out the results branch
+        uses: actions/checkout@v4
+        with:
+          ref: parity-results
+          path: results
+
+      - name: Download the results
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: parity-*
+          path: downloads
+
+      - name: Add the results and write the summary
+        env:
+          SECRET_VALUES: ${{ secrets.TB_API_KEY }} ${{ secrets.DAYTONA_API_KEY }} ${{ secrets.TB_BASE_URL }}
+        run: |
+          mkdir -p downloads
+          python3 ci/parity/publish.py --downloads downloads --results results --results-dir "$RESULTS_DIR"
+          python3 ci/parity/redact.py results
+          cat "results/$RESULTS_DIR/summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit and push
+        working-directory: results
+        env:
+          LABEL: ${{ needs.plan.outputs.label }}
+          WORKFLOW_RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing new to publish."
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" \
+            -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Parity results: $RESULTS_DIR" -m "Workflow run: $WORKFLOW_RUN"
+          git push origin HEAD:parity-results
