@@ -266,11 +266,12 @@ jobs:
           AGENT_FLAGS: ${{ needs.plan.outputs.agent_flags }}
           AGENT_MODEL: ${{ needs.plan.outputs.agent_model }}
         run: |
+          image="tavernbench-agent:$CLAUDE_CODE_VERSION"  # agent_env.sh removes CLAUDE_* variables
           source "$GITHUB_WORKSPACE/parity/agent_env.sh"
           mkdir -p "$GITHUB_WORKSPACE/$OUT"
           python -m tavernbench.run_agent --set data/eval \
             --harbor-tasks "$GITHUB_WORKSPACE/datasets/tavernbench" \
-            --image "tavernbench-agent:$CLAUDE_CODE_VERSION" --model "$AGENT_MODEL" \
+            --image "$image" --model "$AGENT_MODEL" \
             --cli-flags="$AGENT_FLAGS" --out "$GITHUB_WORKSPACE/$OUT/answers.jsonl" \
             --jobs "$N_CONCURRENT" --keep-logs \
             --ids "$(paste -sd, "$GITHUB_WORKSPACE/selected_ids.txt")"

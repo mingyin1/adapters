@@ -14,7 +14,8 @@ the launch command goes through the claude-code agent's own `_classify_exec_erro
 the run's Claude Code output (logs/<id>/claude-code.txt, the stdout Harbor would see),
 and Harbor's policy table says whether the reward stays valid. Rows whose reward Harbor
 would not keep get an `error` field, which the unchanged upstream scorer scores as 0.
-Every row gets `harbor_exception` and `harbor_reward_valid`.
+Every row gets `harbor_exception`, `harbor_graded` (false after a setup or configuration
+error, such as a rejected API key) and `harbor_reward_valid`.
 """
 
 from __future__ import annotations
@@ -72,10 +73,11 @@ def main() -> None:
     with open(args.out, "w", encoding="utf-8") as out:
         for row in rows:
             exception = classify(row, agent, launch_script, logs)
-            valid = exception is None or (
-                exception != "RunnerError" and policy_for(exception).has_valid_reward
-            )
+            policy = policy_for(exception) if exception not in (None, "RunnerError") else None
+            valid = exception is None or (policy is not None and policy.has_valid_reward)
             row["harbor_exception"] = exception
+            # Harbor does not grade a trial after a setup or configuration error.
+            row["harbor_graded"] = exception is None or (policy is not None and policy.should_grade)
             row["harbor_reward_valid"] = valid
             if not valid and not row.get("runner_error"):
                 row["error"] = f"{exception}: Harbor gives this run no valid reward"

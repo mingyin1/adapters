@@ -24,6 +24,9 @@ SIDE_NAMES = {
     "harbor": "Harbor (adapter + `claude-code` agent)",
 }
 MAX_LISTED = 40
+# Tasks that never reached grading: a setup or configuration error (Harbor does not grade
+# the trial), a container that could not be started, or no result at all.
+NOT_GRADED = "not graded (setup, configuration or infrastructure error)"
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -44,6 +47,8 @@ def load_harbor(shard: Path) -> tuple[dict, Counter, float | None]:
         types = [e["type"] for e in row.get("exceptions", [])]
         for t in types:
             errors[f"exception: {t}"] += 1
+        if any(not e.get("graded", True) for e in row.get("exceptions", [])) or row.get("collect_error"):
+            errors[NOT_GRADED] += 1
         if "AgentTimeoutError" in types:
             errors["agent timed out"] += 1
         if row.get("agent_is_error"):
@@ -72,9 +77,12 @@ def load_original(shard: Path) -> tuple[dict, Counter, float | None]:
         outcome[task_id] = float(scored.get(task_id, 0))
         if row.get("runner_error"):
             errors["container could not be run"] += 1
+            errors[NOT_GRADED] += 1
             continue
         if row.get("harbor_exception"):
             errors[f"exception: {row['harbor_exception']}"] += 1
+        if row.get("harbor_graded") is False:
+            errors[NOT_GRADED] += 1
         if row.get("agent_timed_out"):
             errors["agent timed out"] += 1
         if row.get("agent_is_error"):
@@ -102,6 +110,7 @@ def load_run(side: str, run_dir: Path) -> dict:
     missing = [i for i in ids if i not in outcome]
     if missing:
         errors["no result (counted as 0)"] += len(missing)
+        errors[NOT_GRADED] += len(missing)
     expected = metas[0]["shards"] if metas else 0
     statuses = sorted({m.get("job_status", "unknown") for m in metas})
     correct = sum(outcome.get(i, 0.0) for i in ids)
@@ -213,6 +222,12 @@ def render(data: dict, sides: dict, task_info: dict) -> str:
         out.append(f"| {SIDE_NAMES[side]} | {st['n']} | {per_run} | {mean} | "
                    f"{f'{sum(costs):.2f}' if costs else '–'} |")
     out.append("")
+    ungraded = [(side, r["run"], r["errors"][NOT_GRADED]) for side in SIDES
+                for r in sides[side]["runs"] if r["errors"].get(NOT_GRADED)]
+    if ungraded:
+        listed = ", ".join(f"{side} run {run}: {n}" for side, run, n in ungraded)
+        out += [f"**Warning:** some tasks were never graded and count as 0 ({listed}). These are "
+                "setup, configuration or infrastructure errors, not agent results; see Errors.", ""]
     if data["range_overlap"] is not None:
         out += [f"Run-score ranges overlap: **{'yes' if data['range_overlap'] else 'no'}** "
                 "(the match criterion, meant for three runs per side).", ""]

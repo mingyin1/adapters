@@ -7,11 +7,16 @@
 # custom endpoint, if there is one. With DRY_RUN=true a dummy key is used instead.
 # Expects AUTH_VAR and DRY_RUN (from config.env) and TB_API_KEY, TB_BASE_URL.
 
+removed=""
 for name in $(compgen -e); do
   case "$name" in
-    ANTHROPIC_* | CLAUDE_* | AWS_* | MAX_THINKING_TOKENS | DISABLE_PROMPT_CACHING) unset "$name" ;;
+    ANTHROPIC_* | CLAUDE_* | AWS_* | MAX_THINKING_TOKENS | DISABLE_PROMPT_CACHING)
+      unset "$name"
+      removed="$removed $name"
+      ;;
   esac
 done
+echo "agent_env.sh: removed from the environment:${removed:- nothing}"
 
 case "$AUTH_VAR" in
   ANTHROPIC_API_KEY | ANTHROPIC_AUTH_TOKEN) ;;
